@@ -1,0 +1,36 @@
+{
+    "name": "Go with Docker and Delve",
+    "image": "golang:1.22",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "latest",
+            "moby": true,
+            "dockerDashComposeVersion": "v2"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "go.toolsManagement.checkForUpdates": "local",
+                "go.useLanguageServer": true,
+                "go.gopath": "/go"
+            },
+            "extensions": [
+                "golang.Go",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    "runArgs": [
+        "--init",
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined"
+    ],
+    "remoteUser": "root",
+    "postCreateCommand": "go install -v github.com/go-delve/delve/cmd/dlv@latest && go mod download && go version && docker --version && docker compose version",
+    "mounts": [
+        "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+    ],
+    "workspaceFolder": "/workspace"
+}
