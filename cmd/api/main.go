@@ -1,8 +1,10 @@
 package main
 
 import (
-	"log"
 	"net/http"
+	"os"
+
+	"golang.org/x/exp/slog"
 
 	adapterhttp "github.com/willejs/ports-service/internal/adapter/http"
 	"github.com/willejs/ports-service/internal/adapter/repository"
@@ -12,10 +14,13 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
 	// Initialize MemDB
 	db, err := memdb.NewMemDB()
 	if err != nil {
-		log.Fatalf("error initializing MemDB: %v", err)
+		logger.Error("Failed to initialize MemDB", slog.String("component", "main"), slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	// Create repository, service, controller, and handler
@@ -25,9 +30,11 @@ func main() {
 	portHandler := adapterhttp.NewPortHandler(portController)
 
 	// Load ports data from JSON file
-	log.Println("Upserting ports from file...")
 	if err := portController.UpsertPortsFromFile(); err != nil {
-		log.Fatalf("error upserting ports from file: %v", err)
+		logger.Error("Failed to upsert all ports from file", slog.String("component", "main"), slog.Any("error", err))
+		// theres no fatal level for slog
+		// I would probably use a different logger in future, or just wrap the logger and create a fatal level
+		os.Exit(1)
 	}
 
 	mux := http.NewServeMux()
@@ -41,8 +48,9 @@ func main() {
 		Handler: nil,
 	}
 
-	log.Printf("Starting server on %s", server.Addr)
+	logger.Info("Starting server", slog.String("component", "main"), slog.String("address", server.Addr))
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("error starting server: %v", err)
+		logger.Error("Failed to start server", slog.String("component", "main"), slog.Any("error", err))
+		os.Exit(1)
 	}
 }
