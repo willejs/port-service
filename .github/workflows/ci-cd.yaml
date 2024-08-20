@@ -35,8 +35,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./helm
-            ./kubeconform
+            /usr/local/bin/helm
+            /usr/local/bin/kubeconform
           key: ${{ runner.os }}-helm-v3.12.0-kubeconform-v0.6.7
           restore-keys: |
             ${{ runner.os }}-helm-
@@ -49,12 +49,11 @@ jobs:
           curl -LO https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
           tar -xzf helm-v3.12.0-linux-amd64.tar.gz
           mv linux-amd64/helm ./helm
+          chmod +x ./helm
           curl -LO https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
           tar -xzf kubeconform-linux-amd64.tar.gz
           rm helm-v3.12.0-linux-amd64.tar.gz
           rm kubeconform-linux-amd64.tar.gz
-      - name: Move binaries to /usr/local/bin
-        run: |
           sudo mv ./helm /usr/local/bin/
           sudo mv ./kubeconform /usr/local/bin/
 
