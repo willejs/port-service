@@ -25,6 +25,11 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
+      
+      # lint the dockerfile too
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
 
   test:
     name: Test
