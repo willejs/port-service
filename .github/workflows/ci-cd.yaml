@@ -51,7 +51,6 @@ jobs:
           mv linux-amd64/helm ./helm
           curl -LO https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
           tar -xzf kubeconform-linux-amd64.tar.gz
-          mv kubeconform ./kubeconform
           rm helm-v3.12.0-linux-amd64.tar.gz
           rm kubeconform-linux-amd64.tar.gz
       - name: Move binaries to /usr/local/bin
