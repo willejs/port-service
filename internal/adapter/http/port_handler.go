@@ -26,6 +26,7 @@ func (h *PortHandler) ListPorts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	// Encode the ports to JSON and check for errors
 	if err := json.NewEncoder(w).Encode(ports); err != nil {
 		// return an error

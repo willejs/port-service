@@ -35,6 +35,7 @@ func main() {
 	db, err := memdb.NewMemDB(logger)
 	if err != nil {
 		logger.Error("Failed to initalize memdb", slog.String("component", "main"), slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	// Create repository, service, controller, and handler
