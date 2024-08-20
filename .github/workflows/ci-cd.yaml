@@ -58,7 +58,7 @@ jobs:
 
       - name: Validate Helm Charts with Kubeconform
         run: |
-          helm template helm/port-service | kubeconform -exit-on-error -strict -summary -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.ResourceKind}}/{{.ResourceAPIVersion}} -skip CustomResourceDefinition,MutatingWebhookConfiguration,ValidatingWebhookConfiguration
+          helm template helm/port-service | kubeconform -exit-on-error -strict -summary
 
   test:
     name: Test
