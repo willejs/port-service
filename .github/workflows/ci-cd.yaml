@@ -30,6 +30,21 @@ jobs:
       - uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
+      # lint and validate the helm chart
+      - name: Install Helm & Kubeconform
+        # this should all be cached ideally.
+        run: |
+          # i would build a generic docker image with tools like this in, and probably even a shared action in a
+          # .github private repo that i could use in all my projects
+          curl -LO https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
+          tar -xzf helm-v3.12.0-linux-amd64.tar.gz
+          curl -LO https://github.com/yannh/kubeconform/releases/v0.6.7/download/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform-linux-amd64.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate Helm Charts with Kubeconform
+        run: |
+          helm template helm/port-service | kubeconform -exit-on-error -strict -summary -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.ResourceKind}}/{{.ResourceAPIVersion}} -skip CustomResourceDefinition,MutatingWebhookConfiguration,ValidatingWebhookConfiguration
 
   test:
     name: Test
