@@ -1,10 +1,9 @@
 package http
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 // LoggingMiddleware logs HTTP requests.

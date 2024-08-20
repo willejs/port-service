@@ -3,13 +3,12 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	adapterhttp "github.com/willejs/ports-service/internal/adapter/http"
@@ -33,7 +32,7 @@ func main() {
 	defer otelCleanup()
 
 	// Initialize MemDB
-	db, err := memdb.NewMemDB()
+	db, err := memdb.NewMemDB(logger)
 	if err != nil {
 		logger.Error("Failed to initalize memdb", slog.String("component", "main"), slog.Any("error", err))
 	}
@@ -41,11 +40,10 @@ func main() {
 	// Create repository, service, controller, and handler
 	portRepo := repository.NewMemDBPortRepository(db)
 	portService := app.NewPortService(portRepo)
-	portController := controller.NewPortController(portService)
+	portController := controller.NewPortController(logger, portService)
 	portHandler := adapterhttp.NewPortHandler(portController)
 
 	// Load ports data from JSON file
-	log.Println("Upserting ports from file...")
 	if err := portController.UpsertPortsFromFile(); err != nil {
 		logger.Error("Failed to upsert all ports from file", slog.String("component", "main"), slog.Any("error", err))
 		os.Exit(1)

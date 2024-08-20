@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	"log/slog"
 
 	"github.com/willejs/ports-service/internal/app"
 	"github.com/willejs/ports-service/internal/domain/entity"
@@ -12,11 +12,12 @@ import (
 // PortController defines the controller for handling port-related operations.
 type PortController struct {
 	service *app.PortService
+	logger  *slog.Logger
 }
 
 // NewPortController creates a new PortController.
-func NewPortController(service *app.PortService) *PortController {
-	return &PortController{service: service}
+func NewPortController(logger *slog.Logger, service *app.PortService) *PortController {
+	return &PortController{service: service, logger: logger}
 }
 
 // ListAllPorts retrieves all ports and returns them.
@@ -28,9 +29,9 @@ func (c *PortController) ListAllPorts() ([]*entity.Port, error) {
 func (c *PortController) UpsertPortsFromFile() error {
 	// Load ports data from JSON file
 	// I should open the file and get the handle here instead of reading it all into memory
+	c.logger.Info("Upserting ports from file", slog.String("component", "controller/port_controller"))
 	data, err := ioutil.ReadFile("../../data/ports.json")
 	if err != nil {
-		log.Fatalf("error reading ports file: %v", err)
 		return err
 	}
 
@@ -45,6 +46,7 @@ func (c *PortController) UpsertPortsFromFile() error {
 	for key, port := range ports {
 		// the data sometimes missess the code attribute, instead of any logic to santize or normalise data lets just use the key of the map.
 		if port.Code == "" {
+			c.logger.Debug("Port does not have a code attribute, using key as code", slog.String("component", "controller/port_controller"), slog.String("key", key))
 			// if port does not have a arrtibute code use key as code
 			port.Code = key
 		}
