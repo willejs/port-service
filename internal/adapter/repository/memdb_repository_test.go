@@ -1,6 +1,8 @@
 package repository_test
 
 import (
+	"log/slog"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +12,8 @@ import (
 )
 
 func TestMemDBPortRepository_GetAllPorts(t *testing.T) {
-	db, err := memdb.NewMemDB()
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	db, err := memdb.NewMemDB(logger)
 	assert.NoError(t, err)
 	// Create the repository
 	repo := repository.NewMemDBPortRepository(db)

@@ -13,7 +13,7 @@ COPY . .
 
 # statically compile the go binary for the presumed target of amd64 linux
 # whilst its larger, its more portable and will run in a scratch container
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o api-server ./cmd/api-server
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o api-server ./cmd/api
 
 # hack to create the nobody user for the scratch container.
 # hadolint ignore=DL3059
