@@ -2,8 +2,9 @@ package http
 
 import (
 	"encoding/json"
-	"github.com/willejs/ports-service/internal/controller"
 	"net/http"
+
+	"github.com/willejs/ports-service/internal/controller"
 )
 
 // PortHandler handles HTTP requests for ports.
@@ -25,5 +26,10 @@ func (h *PortHandler) ListPorts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(ports)
+	// Encode the ports to JSON and check for errors
+	if err := json.NewEncoder(w).Encode(ports); err != nil {
+		// return an error
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
