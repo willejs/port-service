@@ -31,16 +31,33 @@ jobs:
         with:
           dockerfile: Dockerfile
       # lint and validate the helm chart
+      - name: Cache Helm & Kubeconform
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./helm
+            ./kubeconform
+          key: ${{ runner.os }}-helm-v3.12.0-kubeconform-v0.6.7
+          restore-keys: |
+            ${{ runner.os }}-helm-
+            ${{ runner.os }}-kubeconform-
       - name: Install Helm & Kubeconform
-        # this should all be cached ideally.
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           # i would build a generic docker image with tools like this in, and probably even a shared action in a
           # .github private repo that i could use in all my projects
           curl -LO https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
           tar -xzf helm-v3.12.0-linux-amd64.tar.gz
-          curl -LO https://github.com/yannh/kubeconform/releases/v0.6.7/download/kubeconform-linux-amd64.tar.gz
+          mv linux-amd64/helm ./helm
+          curl -LO https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
           tar -xzf kubeconform-linux-amd64.tar.gz
-          sudo mv kubeconform /usr/local/bin/
+          mv kubeconform ./kubeconform
+          rm helm-v3.12.0-linux-amd64.tar.gz
+          rm kubeconform-linux-amd64.tar.gz
+      - name: Move binaries to /usr/local/bin
+        run: |
+          sudo mv ./helm /usr/local/bin/
+          sudo mv ./kubeconform /usr/local/bin/
 
       - name: Validate Helm Charts with Kubeconform
         run: |
