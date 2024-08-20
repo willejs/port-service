@@ -7,3 +7,6 @@ build:
 
 build-docker:
 	docker build --platform linux/amd64  -t willejs/port-service:latest .
+
+deploy:
+	helm install port-service helm/port-service

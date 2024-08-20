@@ -30,6 +30,7 @@ EXPOSE 8080
 COPY --from=builder /etc_passwd /etc/passwd
 
 WORKDIR /app
+COPY data /app/data
 COPY --from=builder /app/api-server /app/api-server
 
 # dont run the app as root, it is insecure

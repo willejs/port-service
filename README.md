@@ -56,3 +56,7 @@ Steps to run locally:
 5. Run `make build` to build the docker image
 6. Run `make deploy` to deploy the docker image to your current k8s context
 7. Observe the helm message to test/explore the service
+
+### Debugging in k8s
+1. find the pods with `kubectl get pods`
+2. kubectl debug -it $pod-name-here --image=ubuntu --target=port-service -- /bin/bash 
