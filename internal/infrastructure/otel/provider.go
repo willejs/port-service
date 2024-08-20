@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -28,11 +28,11 @@ func NewProviders(serviceName string) (*Providers, func(), error) {
 		return nil, nil, fmt.Errorf("failed to create the Prometheus exporter: %w", err)
 	}
 
-	// todo: inject this from config
-	jaegerEndpoint := "http://localhost:14268/api/traces"
-	jaeggerExporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(jaegerEndpoint)))
+	ctx := context.Background()
+
+	otlpExporter, err := otlptracehttp.New(ctx)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create the Jaeger exporter: %w", err)
+		return nil, nil, fmt.Errorf("failed to create the otlp exporter: %w", err)
 	}
 
 	resources := resource.NewWithAttributes(
@@ -45,7 +45,7 @@ func NewProviders(serviceName string) (*Providers, func(), error) {
 	// Set up the TracerProvider
 	tp := trace.NewTracerProvider(
 		trace.WithResource(resources),
-		trace.WithBatcher(jaeggerExporter),
+		trace.WithBatcher(otlpExporter),
 		trace.WithSampler(trace.AlwaysSample()), // Adjust sampler as needed
 	)
 
