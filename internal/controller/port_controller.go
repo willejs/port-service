@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"log/slog"
 	"context"
 
@@ -35,7 +35,7 @@ func (c *PortController) UpsertPortsFromFile() error {
 	// Load ports data from JSON file
 	// I should open the file and get the handle here instead of reading it all into memory
 	c.logger.Info(fmt.Sprintf("Upserting ports from file: %s", c.config.PortFile), slog.String("component", "controller/port_controller"))
-	data, err := ioutil.ReadFile(c.config.PortFile)
+	data, err := os.ReadFile(c.config.PortFile)
 	if err != nil {
 		return err
 	}
