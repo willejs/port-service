@@ -30,6 +30,7 @@ Hopefully this is ok, and if not, I am happy to do the assignment again with the
 I am not really happy with the main application code, i think if i spent a bit longer and had some conversations i could clean it up, write more tests, adhere to ddd and make it a bit more idiomatic. I would probably move it to a hexagonal architecture. However, i wanted to showcase some more skills around telemetry, deployment, ci/cd etc, so i tried to timebox myself on this, therefore it feels a bit half finished.
 
 - I would look at creating an elegant logging abstraction that could be used throughout the service, but also other services.
+- Add more context to the traces and logs (like a request id), so that we can trace a request through the system easily.
 - Fully fledged gitops pipeline that would deploy the service to k8s clusters.
 - Plug this into a developer platform like backstage, and create a service catalog entry for it.
 - Create a shared package for otel metrics and tracing.
@@ -56,6 +57,9 @@ Steps to run locally:
 5. Run `make build` to build the docker image
 6. Run `make deploy` to deploy the docker image to your current k8s context
 7. Observe the helm message to test/explore the service
+
+### Bonus
+I have added a run-jaeger target to the makefile, this will run a jaeger instance in a docker container, and you can view the traces that are emitted from the service at http://localhost:16686/.
 
 ### Debugging in k8s
 1. find the pods with `kubectl get pods`
