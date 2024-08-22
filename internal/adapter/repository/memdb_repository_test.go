@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"testing"
@@ -12,6 +13,7 @@ import (
 )
 
 func TestMemDBPortRepository_GetAllPorts(t *testing.T) {
+	ctx := context.Background()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	db, err := memdb.NewMemDB(logger)
 	assert.NoError(t, err)
@@ -34,7 +36,7 @@ func TestMemDBPortRepository_GetAllPorts(t *testing.T) {
 	assert.NoError(t, uErr)
 
 	// Call the GetAllPorts method
-	ports, err := repo.GetAllPorts()
+	ports, err := repo.GetAllPorts(ctx)
 
 	// Check if there was an error
 	assert.NoError(t, err)
