@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/willejs/ports-service/internal/adapter/repository"
 	"github.com/willejs/ports-service/internal/app"
 	"github.com/willejs/ports-service/internal/controller"
+	"github.com/willejs/ports-service/internal/infrastructure/config"
 	infrahttp "github.com/willejs/ports-service/internal/infrastructure/http"
 	"github.com/willejs/ports-service/internal/infrastructure/memdb"
 	"github.com/willejs/ports-service/internal/infrastructure/otel"
@@ -23,6 +25,7 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	config := config.NewConfig()
 
 	// Initialize OpenTelemetry (tracing and metrics)
 	_, otelCleanup, err := otel.NewProviders("port-service")
@@ -41,7 +44,7 @@ func main() {
 	// Create repository, service, controller, and handler
 	portRepo := repository.NewMemDBPortRepository(db)
 	portService := app.NewPortService(portRepo)
-	portController := controller.NewPortController(logger, portService)
+	portController := controller.NewPortController(config, logger, portService)
 	portHandler := adapterhttp.NewPortHandler(portController)
 
 	// Load ports data from JSON file
@@ -63,7 +66,7 @@ func main() {
 	otelLoggedMux := otelhttp.NewHandler(loggedMux, "server")
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%s", config.Port),
 		Handler: otelLoggedMux,
 	}
 

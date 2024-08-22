@@ -9,7 +9,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # copy in the app and build it
-COPY . .
+COPY ./cmd ./cmd
+COPY ./internal ./internal
 
 # statically compile the go binary for the presumed target of amd64 linux
 # whilst its larger, its more portable and will run in a scratch container
@@ -30,9 +31,13 @@ EXPOSE 8080
 COPY --from=builder /etc_passwd /etc/passwd
 
 WORKDIR /app
-COPY data /app/data
+
+COPY data ./data
 COPY --from=builder /app/api-server /app/api-server
 
 # dont run the app as root, it is insecure
 USER nobody
+
+ENV PORT_FILE="/app/data/ports.json"
+
 CMD ["./api-server"]

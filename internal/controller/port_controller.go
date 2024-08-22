@@ -2,22 +2,25 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log/slog"
 
 	"github.com/willejs/ports-service/internal/app"
 	"github.com/willejs/ports-service/internal/domain/entity"
+	"github.com/willejs/ports-service/internal/infrastructure/config"
 )
 
 // PortController defines the controller for handling port-related operations.
 type PortController struct {
 	service *app.PortService
 	logger  *slog.Logger
+	config  *config.Config
 }
 
 // NewPortController creates a new PortController.
-func NewPortController(logger *slog.Logger, service *app.PortService) *PortController {
-	return &PortController{service: service, logger: logger}
+func NewPortController(config *config.Config, logger *slog.Logger, service *app.PortService) *PortController {
+	return &PortController{config: config, service: service, logger: logger}
 }
 
 // ListAllPorts retrieves all ports and returns them.
@@ -29,8 +32,8 @@ func (c *PortController) ListAllPorts() ([]*entity.Port, error) {
 func (c *PortController) UpsertPortsFromFile() error {
 	// Load ports data from JSON file
 	// I should open the file and get the handle here instead of reading it all into memory
-	c.logger.Info("Upserting ports from file", slog.String("component", "controller/port_controller"))
-	data, err := ioutil.ReadFile("../../data/ports.json")
+	c.logger.Info(fmt.Sprintf("Upserting ports from file: %s", c.config.PortFile), slog.String("component", "controller/port_controller"))
+	data, err := ioutil.ReadFile(c.config.PortFile)
 	if err != nil {
 		return err
 	}
