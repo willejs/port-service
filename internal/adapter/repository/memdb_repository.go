@@ -1,10 +1,12 @@
 package repository
 
 import (
+	"context"
 	"errors"
 
 	"github.com/hashicorp/go-memdb"
 	"github.com/willejs/ports-service/internal/domain/entity"
+	"go.opentelemetry.io/otel"
 )
 
 type MemDBPortRepository struct {
@@ -16,7 +18,11 @@ func NewMemDBPortRepository(db *memdb.MemDB) *MemDBPortRepository {
 }
 
 // fetch all ports from the db
-func (r *MemDBPortRepository) GetAllPorts() ([]*entity.Port, error) {
+func (r *MemDBPortRepository) GetAllPorts(ctx context.Context) ([]*entity.Port, error) {
+	// i would usually use a contrib or similar package to instrument the data layer
+	_, span := otel.Tracer("port-service").Start(ctx, "repository.GetAllPorts")
+	defer span.End()
+
 	txn := r.db.Txn(false)
 	defer txn.Abort()
 

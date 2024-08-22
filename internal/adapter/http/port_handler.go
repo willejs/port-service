@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/willejs/ports-service/internal/controller"
+	"go.opentelemetry.io/otel"
 )
 
 // PortHandler handles HTTP requests for ports.
@@ -19,7 +20,13 @@ func NewPortHandler(controller *controller.PortController) *PortHandler {
 
 // ListPorts handles the /ports endpoint.
 func (h *PortHandler) ListPorts(w http.ResponseWriter, r *http.Request) {
-	ports, err := h.controller.ListAllPorts()
+	// i would usually create a base context in main and set the tracer name here, 
+	// then with each handler invocation copying that context.
+	ctx := r.Context()
+	_, span := otel.Tracer("port-service").Start(ctx, "handler.ListPorts")
+	defer span.End()
+
+	ports, err := h.controller.ListAllPorts(ctx)
 	if err != nil {
 		http.Error(w, "Failed to list ports", http.StatusInternalServerError)
 		return

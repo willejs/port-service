@@ -32,9 +32,9 @@ func NewProviders(serviceName string) (*Providers, func(), error) {
 
 	otlpExporter, err := otlptracehttp.New(ctx,
 		// send this to a local otel collector for now, allow overrides later
-		otlptracehttp.WithEndpoint("http://localhost:4318"),
+		otlptracehttp.WithEndpoint("localhost:4318"),
 		// we are presuming this happens over a service mesh or locally on the node etc
-        otlptracehttp.WithInsecure(),
+		otlptracehttp.WithInsecure(),
 	)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create the otlp exporter: %w", err)

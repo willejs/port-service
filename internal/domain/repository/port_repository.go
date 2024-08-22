@@ -1,9 +1,13 @@
 package repository
 
-import "github.com/willejs/ports-service/internal/domain/entity"
+import (
+	"context"
+
+	"github.com/willejs/ports-service/internal/domain/entity"
+)
 
 // PortRepository defines the interface for port data operations.
 type PortRepository interface {
-	GetAllPorts() ([]*entity.Port, error)
+	GetAllPorts(ctx context.Context) ([]*entity.Port, error)
 	UpsertPort(port *entity.Port) error
 }

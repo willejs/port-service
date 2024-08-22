@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log/slog"
+	"context"
 
 	"github.com/willejs/ports-service/internal/app"
 	"github.com/willejs/ports-service/internal/domain/entity"
 	"github.com/willejs/ports-service/internal/infrastructure/config"
+
 )
 
 // PortController defines the controller for handling port-related operations.
@@ -24,8 +26,8 @@ func NewPortController(config *config.Config, logger *slog.Logger, service *app.
 }
 
 // ListAllPorts retrieves all ports and returns them.
-func (c *PortController) ListAllPorts() ([]*entity.Port, error) {
-	return c.service.ListAllPorts()
+func (c *PortController) ListAllPorts(ctx context.Context) ([]*entity.Port, error) {
+	return c.service.ListAllPorts(ctx)
 }
 
 // I should probably do this in a service but for now this is fine
