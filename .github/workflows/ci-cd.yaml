@@ -1,0 +1,93 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
+      
+      # lint the dockerfile too
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+      # lint and validate the helm chart
+      - name: Cache Helm & Kubeconform
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/bin/helm
+            /usr/local/bin/kubeconform
+          key: ${{ runner.os }}-helm-v3.12.0-kubeconform-v0.6.7
+          restore-keys: |
+            ${{ runner.os }}-helm-
+            ${{ runner.os }}-kubeconform-
+      - name: Install Helm & Kubeconform
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          # i would build a generic docker image with tools like this in, and probably even a shared action in a
+          # .github private repo that i could use in all my projects
+          curl -LO https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
+          tar -xzf helm-v3.12.0-linux-amd64.tar.gz
+          mv linux-amd64/helm /usr/local/bin/
+          rm helm-v3.12.0-linux-amd64.tar.gz
+
+          curl -LO https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform-linux-amd64.tar.gz
+          mv ./kubeconform /usr/local/bin/
+          rm kubeconform-linux-amd64.tar.gz
+
+      - name: Validate Helm Charts with Kubeconform
+        run: |
+          helm template helm/port-service | kubeconform -exit-on-error -strict -summary
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Run tests
+        run: |
+          go test -v ./...
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Build the project
+        run: |
+          go build -v ./...
